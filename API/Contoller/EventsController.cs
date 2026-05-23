@@ -1,10 +1,10 @@
 using API.Data;
 using API.DTOs;
+using API.Entities;
+using API.Messaging;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
-using API.Entities;
-
 namespace API.Controllers;
 
 [ApiController]
@@ -12,10 +12,14 @@ namespace API.Controllers;
 public class EventsController : ControllerBase
 {
     private readonly AppDbContext _context;
+    private readonly RabbitMqProducer _rabbitMqProducer;
 
-    public EventsController(AppDbContext context)
+    public EventsController(
+        AppDbContext context,
+        RabbitMqProducer rabbitMqProducer)
     {
         _context = context;
+        _rabbitMqProducer = rabbitMqProducer;
     }
 
     [HttpPost]
@@ -206,5 +210,12 @@ public async Task<IActionResult> BulkInsert(
     {
         Inserted = events.Count
     });
+}
+[HttpPost("publish")]
+public IActionResult Publish(CreateEventRequest request)
+{
+    _rabbitMqProducer.Send(request);
+
+    return Ok("Event sent to RabbitMQ");
 }
 }

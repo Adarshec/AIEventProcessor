@@ -15,7 +15,9 @@ public class AppDbContext : DbContext
         builder.Entity<Device>()
             .HasIndex(x => x.DeviceIdText)
             .IsUnique();
-
+        builder.Entity<Event>()
+            .Property(x => x.Temperature)
+            .HasPrecision(10, 2);
         builder.Entity<Event>()
             .HasIndex(x => x.Timestamp);
 
@@ -23,8 +25,7 @@ public class AppDbContext : DbContext
             .HasIndex(x => new { x.DeviceId, x.Timestamp });
 
         builder.Entity<Event>()
-            .Property(x => x.Metadata)
-            .HasColumnType("jsonb");
+            .Property(x => x.Metadata);
 
         builder.Entity<Event>()
         .HasOne(x => x.Device)
