@@ -72,12 +72,16 @@ docker run -e "ACCEPT_EULA=Y" \
 -p 1433:1433 \
 --name sqlserver \
 -d mcr.microsoft.com/mssql/server:2022-latest
-##Start RabbitMQ
+
+###Start RabbitMQ
+
 docker run -d \
 --hostname rabbit \
 -p 5672:5672 -p 15672:15672 \
 rabbitmq:3-management
-##Run Application
+
+###Run Application
+
 cd API
 dotnet restore
 dotnet run
