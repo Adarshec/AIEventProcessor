@@ -1,6 +1,6 @@
 # AI Event Processing System
 
-Backend system for ingesting and querying AI/IoT telemetry events using ASP.NET Core, EF Core, and PostgreSQL.
+Backend system for ingesting and querying AI/IoT telemetry events using ASP.NET Core, EF Core, RabbitMq and SQL Server
 
 ---
 
@@ -8,7 +8,8 @@ Backend system for ingesting and querying AI/IoT telemetry events using ASP.NET 
 
 - ASP.NET Core 10 Web API
 - Entity Framework Core
-- PostgreSQL
+- SQL Server
+- RabbitMq
 - Swagger
 - xUnit
 - FluentAssertions
@@ -49,6 +50,8 @@ Returns:
 - count per device
 
 ---
+### POST /api/events/publish
+-Publish event to RabbitMQ queue (asynchronous processing)
 
 ## Performance Optimizations
 
@@ -56,32 +59,26 @@ Returns:
 - Batch insertion using AddRangeAsync
 - Reduced database round trips
 - Indexed timestamp and device fields
-- JSONB column for metadata
 - Avoided N+1 queries
-
----
-
-## Trade-offs
-
-- Used EF Core batching instead of raw SQL COPY for simplicity and maintainability
-- Metadata stored as JSONB for flexibility over strict schema normalization
-
----
-
-## Assumptions
-
-- Device IDs are unique
-- Events are immutable after insertion
-- Metadata schema may evolve over time
 
 ---
 
 ## Run Project
 
-### Start PostgreSQL
+### Start SQL Server (Docker)
 
-```bash
-docker compose up -d
+docker run -e "ACCEPT_EULA=Y" \
+-e "MSSQL_SA_PASSWORD=YourPassword123!" \
+-p 1433:1433 \
+--name sqlserver \
+-d mcr.microsoft.com/mssql/server:2022-latest
+##Start RabbitMQ
+docker run -d \
+--hostname rabbit \
+-p 5672:5672 -p 15672:15672 \
+rabbitmq:3-management
+##Run Application
 cd API
-dotnet watch run
+dotnet restore
+dotnet run
 dotnet test
