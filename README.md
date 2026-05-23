@@ -1,6 +1,16 @@
 # AI Event Processing System
 
-Backend system for ingesting and querying AI/IoT telemetry events using ASP.NET Core, EF Core, RabbitMq and SQL Server
+Backend system for ingesting and querying AI/IoT telemetry events using ASP.NET Core, EF Core, RabbitMQ and SQL Server
+
+---
+## Architecture Decisions
+
+- Chose **event-driven architecture** using RabbitMQ to decouple API from database operations
+- API layer is responsible only for validation and message publishing
+- A separate consumer handles persistence to SQL Server
+- EF Core used for ORM-based data access for maintainability and rapid development
+- JSON metadata stored as serialized string to support flexible schema evolution
+- Docker used for running infrastructure services (SQL Server, RabbitMQ)
 
 ---
 
@@ -27,7 +37,26 @@ Backend system for ingesting and querying AI/IoT telemetry events using ASP.NET 
 - Integration testing
 
 ---
+## Trade-offs
 
+- Introduced **eventual consistency** by using RabbitMQ instead of direct DB writes
+- Chose EF Core over raw SQL bulk operations for readability and maintainability
+- Metadata stored as JSON string instead of normalized relational tables for flexibility
+- Additional infrastructure complexity due to RabbitMQ setup
+- Slight increase in latency due to asynchronous processing
+
+---
+
+## Assumptions
+
+- Device IDs are globally unique identifiers
+- Events are immutable once stored in the system
+- RabbitMQ consumer service is always running for full data pipeline functionality
+- Message delivery is reliable (acknowledged after processing)
+- JSON metadata structure may evolve without schema migration
+- System runs in a trusted environment (no external authentication implemented)
+
+----
 ## API Endpoints
 
 ### POST /api/events
